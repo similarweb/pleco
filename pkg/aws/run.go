@@ -10,10 +10,11 @@ import (
 	"github.com/aws/aws-sdk-go/service/elbv2"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/rds"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/sfn"
 	"github.com/aws/aws-sdk-go/service/sqs"
-	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -39,6 +40,7 @@ type AwsOptions struct {
 	EnableECR            bool
 	EnableSQS            bool
 	EnableLambda         bool
+	EnableSFN            bool
 }
 
 type AWSSessions struct {
@@ -54,6 +56,7 @@ type AWSSessions struct {
 	ECR            *ecr.ECR
 	SQS            *sqs.SQS
 	LambdaFunction *lambda.Lambda
+	SFN            *sfn.SFN
 }
 
 type funcDeleteExpired func(sessions AWSSessions, options AwsOptions)
@@ -173,6 +176,12 @@ func runPlecoInRegion(region string, interval int64, wg *sync.WaitGroup, options
 	if options.EnableLambda {
 		sessions.LambdaFunction = lambda.New(currentSession)
 		listServiceToCheckStatus = append(listServiceToCheckStatus, DeleteExpiredLambdaFunctions)
+	}
+
+	// Step Function State Machines
+	if options.EnableSFN {
+		sessions.SFN = sfn.New(currentSession)
+		listServiceToCheckStatus = append(listServiceToCheckStatus, DeleteExpiredStateMachines)
 	}
 
 	for {

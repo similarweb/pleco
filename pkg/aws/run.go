@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/rds"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -37,6 +38,7 @@ type AwsOptions struct {
 	EnableDocumentDB     bool
 	EnableECR            bool
 	EnableSQS            bool
+	EnableLambda         bool
 }
 
 type AWSSessions struct {
@@ -51,6 +53,7 @@ type AWSSessions struct {
 	IAM            *iam.IAM
 	ECR            *ecr.ECR
 	SQS            *sqs.SQS
+	LambdaFunction *lambda.Lambda
 }
 
 type funcDeleteExpired func(sessions AWSSessions, options AwsOptions)
@@ -164,6 +167,12 @@ func runPlecoInRegion(region string, interval int64, wg *sync.WaitGroup, options
 	if options.EnableSQS {
 		sessions.SQS = sqs.New(currentSession)
 		listServiceToCheckStatus = append(listServiceToCheckStatus, DeleteExpiredSQSQueues)
+	}
+
+	// Lambda Function
+	if options.EnableLambda {
+		sessions.LambdaFunction = lambda.New(currentSession)
+		listServiceToCheckStatus = append(listServiceToCheckStatus, DeleteExpiredLambdaFunctions)
 	}
 
 	for {

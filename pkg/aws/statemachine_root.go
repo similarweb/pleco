@@ -107,7 +107,7 @@ func DeleteExpiredStateMachines(sessions AWSSessions, options AwsOptions) {
 	for _, machine := range expiredMachines {
 		deletionErr := deleteStateMachine(*sessions.SFN, machine)
 		if deletionErr != nil {
-			log.Errorf("Deletion Lambda function error %s/%s: %s", machine.machineName, region, deletionErr.Error())
+			log.Errorf("Deletion Step function error %s/%s: %s", machine.machineName, region, deletionErr.Error())
 		}
 	}
 }

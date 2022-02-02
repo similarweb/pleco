@@ -46,7 +46,7 @@ spec:
             {{ end }}
             {{ if .Values.enabledFeatures.kubernetes }}
             - --kube-conn
-            - {{ .Values.enabledFeatures.kubernetes }}
+            - {{ .Values.enabledFeatures.kubernetes | quote }}
             {{ end }}
             {{ if eq .Values.enabledFeatures.s3 true }}
             - --enable-s3

@@ -15,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/sfn"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -41,6 +42,7 @@ type AwsOptions struct {
 	EnableSQS            bool
 	EnableLambda         bool
 	EnableSFN            bool
+	EnableCloudFormation bool
 }
 
 type AWSSessions struct {
@@ -57,6 +59,7 @@ type AWSSessions struct {
 	SQS            *sqs.SQS
 	LambdaFunction *lambda.Lambda
 	SFN            *sfn.SFN
+	CloudFormation *cloudformation.CloudFormation
 }
 
 type funcDeleteExpired func(sessions AWSSessions, options AwsOptions)
@@ -182,6 +185,12 @@ func runPlecoInRegion(region string, interval int64, wg *sync.WaitGroup, options
 	if options.EnableSFN {
 		sessions.SFN = sfn.New(currentSession)
 		listServiceToCheckStatus = append(listServiceToCheckStatus, DeleteExpiredStateMachines)
+	}
+
+	// Cloudformation Stacks
+	if options.EnableCloudFormation {
+		sessions.CloudFormation = cloudformation.New(currentSession)
+		listServiceToCheckStatus = append(listServiceToCheckStatus, DeleteExpiredStacks)
 	}
 
 	for {

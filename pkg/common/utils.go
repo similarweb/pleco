@@ -135,7 +135,12 @@ func CheckIfExpired(creationTime time.Time, ttl int64, resourceName string) bool
 		log.Warnf("Creation date tag is missing. Can't check if resource %s is expired.", resourceName)
 		return false
 	}
+	now := time.Now().UTC()
 
+	log.Debugf("Resource: %s, Creation Time: %s, ttl: %d", resourceName, creationTime.String(), ttl)
+	log.Debugf("Resouce: %s Now is: %s and expiration time is: %s", resourceName, now.String(), expirationTime.String())
+
+	log.Debugf("Resource: %s, expired: t", resourceName, time.Now().UTC().After(expirationTime))
 	return time.Now().UTC().After(expirationTime)
 }
 

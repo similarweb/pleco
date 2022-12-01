@@ -140,7 +140,7 @@ func CheckIfExpired(creationTime time.Time, ttl int64, resourceName string) bool
 	log.Debugf("Resource: %s, Creation Time: %s, ttl: %d", resourceName, creationTime.String(), ttl)
 	log.Debugf("Resouce: %s Now is: %s and expiration time is: %s", resourceName, now.String(), expirationTime.String())
 
-	log.Debugf("Resource: %s, expired: t", resourceName, time.Now().UTC().After(expirationTime))
+	log.Debugf("Resource: %s, expired: %t", resourceName, time.Now().UTC().After(expirationTime))
 	return time.Now().UTC().After(expirationTime)
 }
 

@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/rds"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/sfn"
+	"github.com/aws/aws-sdk-go/service/cloudformation"
 	log "github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
@@ -73,6 +74,10 @@ func GetEssentialTags(tagsInput interface{}, tagName string) EssentialTags {
 		for _, elem := range typedTags {
 			tags = append(tags, MyTag{Key: *elem.Key, Value: *elem.Value})
 		}
+	case []*cloudformation.Tag:
+		for _, elem := range typedTags {
+			tags = append(tags, MyTag{Key: *elem.Key, Value: *elem.Value})
+		}
 	case []*Tag:
 		for _, elem := range typedTags {
 			tags = append(tags, MyTag{Key: *elem.Key, Value: *elem.Value})
@@ -130,7 +135,12 @@ func CheckIfExpired(creationTime time.Time, ttl int64, resourceName string) bool
 		log.Warnf("Creation date tag is missing. Can't check if resource %s is expired.", resourceName)
 		return false
 	}
+	now := time.Now().UTC()
 
+	log.Debugf("Resource: %s, Creation Time: %s, ttl: %d", resourceName, creationTime.String(), ttl)
+	log.Debugf("Resouce: %s Now is: %s and expiration time is: %s", resourceName, now.String(), expirationTime.String())
+
+	log.Debugf("Resource: %s, expired: %t", resourceName, time.Now().UTC().After(expirationTime))
 	return time.Now().UTC().After(expirationTime)
 }
 

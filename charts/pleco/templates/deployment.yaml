@@ -46,7 +46,7 @@ spec:
             {{ end }}
             {{ if .Values.enabledFeatures.kubernetes }}
             - --kube-conn
-            - {{ .Values.enabledFeatures.kubernetes }}
+            - {{ .Values.enabledFeatures.kubernetes | quote }}
             {{ end }}
             {{ if eq .Values.enabledFeatures.s3 true }}
             - --enable-s3
@@ -93,6 +93,18 @@ spec:
             {{ end }}
             {{ if or (eq .Values.awsFeatures.ecr true)}}
             - --enable-ecr
+            {{ end }}
+            {{ if or (eq .Values.awsFeatures.sfn true)}}
+            - --enable-sfn
+            {{ end }}
+            {{ if or (eq .Values.awsFeatures.sqs true)}}
+            - --enable-sqs
+            {{ end }}
+            {{ if or (eq .Values.awsFeatures.lambda true)}}
+            - --enable-lambda
+            {{ end }}
+            {{ if or (eq .Values.awsFeatures.cloudformation true)}}
+            - --enable-cloudformation
             {{ end }}
             {{- end }}
 

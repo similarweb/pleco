@@ -23,16 +23,26 @@ func CloudformationSession(sess session.Session, region string) *cloudformation.
 
 func listTaggedStacks(svc cloudformation.CloudFormation, tagName string) ([]CloudformationStack, error) {
 	var taggedStacks []CloudformationStack
+	var statusFilterInput []*string
+	for _, val := range cloudformation.StackStatus_Values() {
+		if val == cloudformation.StackStatusDeleteComplete {
+			continue
+		}
+		currentValue := val
+		statusFilterInput = append(statusFilterInput, &currentValue)
+	}
 
-	result, err := svc.ListStacks(nil)
+	result, err := svc.ListStacks(&cloudformation.ListStacksInput{
+		StackStatusFilter: statusFilterInput,
+	})
 	if err != nil {
-		return nil, err
+		log.Errorf("Could not list CloudFormation Stacks: %s", err)
 	}
 
 	if len(result.StackSummaries) == 0 {
 		return nil, nil
 	}
-
+	
 	for _, stack := range result.StackSummaries {
 		describeStacksInput := &cloudformation.DescribeStacksInput{
 			StackName: aws.String(*stack.StackName),
@@ -40,7 +50,7 @@ func listTaggedStacks(svc cloudformation.CloudFormation, tagName string) ([]Clou
 
 		stackDescriptionList, err := svc.DescribeStacks(describeStacksInput)
 		
-		if err != nil  {
+		if err != nil {
 			continue
 		}
 		stackDescription := stackDescriptionList.Stacks[0]
